@@ -1,3 +1,4 @@
+//Author: Cory McDonald
 #include <stdio.h>
 #include <string.h>
 
@@ -6,12 +7,13 @@ typedef int bool;
 #define true 1
 #define false 0
 
-// int parse_command(char* line, char** cmd1, char** cmd2, char* infile, char* outfile);
+int parse_command(char* line, char** cmd1, char** cmd2, char* infile, char* outfile);
 
 
 int main ( int argc, char *argv[] )
 {
     int returnCode = 0;
+    bool active = true;
     //Making sure arguments were passed in
 	if(argc>0)
 	{
@@ -30,6 +32,7 @@ int main ( int argc, char *argv[] )
 		{
 			if (strstr(token, "quit")) //Quiting
 			{
+				active = false;
 				printf("Program terminates successfully by the user\n");
 				break;
 			}
@@ -96,10 +99,12 @@ int main ( int argc, char *argv[] )
 			token = strtok(NULL, s);
 		}
 	}
-	return 0;
+	return returnCode;
 }
 
-// int parse_command(char* line, char** cmd1, char** cmd2, char* infile, char* outfile);
-// {
-//     return 0;
-// }
+int parse_command(char* line, char** cmd1, char** cmd2, char* infile, char* outfile)
+{
+	//TODO not quite sure what to do here. Going to wait until Dr. Lee informs of what to do.
+	//Check to see if command exists
+    return 0;
+}
