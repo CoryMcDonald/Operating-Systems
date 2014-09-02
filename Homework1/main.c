@@ -1,10 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-
-//Gotta have my bools
-typedef int bool;
-#define true 1
-#define false 0
+#include <stdbool.h>
 
 // int parse_command(char* line, char** cmd1, char** cmd2, char* infile, char* outfile);
 
