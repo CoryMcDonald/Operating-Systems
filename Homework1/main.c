@@ -1,52 +1,61 @@
 #include <stdio.h>
 #include <string.h>
 
+//Gotta have my bools
+typedef int bool;
+#define true 1
+#define false 0
+
 int main ( int argc, char *argv[] )
 {
+    //Making sure arguments were passed in
 	if(argc>0)
-	{ 
+	{
+	    //Token to replace in the arguments passed in
 		char s[2] = " ";
 		char *token;
-		bool outputRedirected = false;
+		//If the output is redirected we must know
+		bool isOutputRedirected = false;
+		char outputRedirectedTo[3] = ""; //Could be >>,>,<
+		//If the command is piped out then we will want to read in the command the user wants to complete
 		bool reset = true;
 
-		token = strtok(argv[1], s);
-		while(token != NULL ) 
+		token = strtok(argv[1], s); //Tokenizing
+		while(token != NULL )
 		{
-			//Taking in command, otherwise we will assume it is an argument
-			if (strstr(token, "quit"))
+			if (strstr(token, "quit")) //Quiting
 			{
 				printf("Program terminates successfully by the user\n");
 				break;
 			}
-			else if(reset == true)
+			else if(reset == true) //Taking in command, otherwise we will assume it is an argument
 			{
 				printf("The user command or program is: [%s]\n", token );
-				//Execute and push results to stack?
 				reset = false;
 			}
-			else if(strstr(token, "|"))
+			else if(strstr(token, "|")) //Pipin'
 			{
 				reset = true;
-				//If there is anything on the stack then were going 
 				printf("Pipe: yes\n");
 			}
-			else if(strstr(token,">>") || strstr(token,">") || strstr(token,"<"))
+			else if(strstr(token,">>") || strstr(token,">") || strstr(token,"<")) //Output redirected
 			{
-				outputRedirected = true;
+				isOutputRedirected = true;
+				strncpy(outputRedirectedTo, token, sizeof(outputRedirectedTo));
+				outputRedirectedTo[sizeof(outputRedirectedTo) - 1] = '\0';
 				printf("Output Direction: %s\n", token);
 			}
-			else if (outputRedirected)
+			else if (isOutputRedirected == true)
 			{
-				if(strstr(token,">>"))
+				if(strstr(outputRedirectedTo,">>"))
 				{
 					printf("Output file: %s\n", token);
 				}
-				else if (strstr(token,">"))
+				else if (strstr(outputRedirectedTo,">"))
 				{
 					printf("Output overwritten: %s\n", token);
 				}
-				else if(strstr(token,"<"))
+				else if(strstr(outputRedirectedTo,"<"))
 				{
 					printf("Input: %s\n", token);
 				}
@@ -59,4 +68,5 @@ int main ( int argc, char *argv[] )
 			token = strtok(NULL, s);
 		}
 	}
+	return 0;
 }
