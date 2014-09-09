@@ -16,7 +16,7 @@ int main ( int argc, char *argv[] )
 	if(argc > 1)
 	{
 		parse_input(argv[1]);
-	}else 
+	}else
 	{
 		while(active)
 		{
@@ -44,33 +44,36 @@ void parse_input(char* input)
 	char outputRedirectedTo[3] = ""; //Could be >>,>,<
 	//If the command is piped out then we will want to read in the command the user wants to complete
 	bool reset = true;
-	// bool pipe = false;
 
 	token = strtok(input, s); //Tokenizing
 	while(token != NULL )
 	{
-		if (strstr(token, "quit")) //Quiting
+		if (strstr(token, "quit") || strstr(token, "exit")) //Quiting
 		{
-			// active = false;
 			printf("Program terminates successfully by the user\n");
 			break;
 		}
 		else if(reset == true) //Taking in command, otherwise we will assume it is an argument
 		{
+		    //If command is not found do not continue.
 			printf("The user command or program is: [%s]\n", token );
 			reset = false;
 		}
 		else if(strstr(token, "|")) //Pipin'
 		{
 			reset = true;
-			// pipe =  true;
-			// if(pipe == true)
-			// {
-			// 	returnCode = 7;
-			// }else
-			// {
-			// 	returnCode = 4;
-			// }
+			//Handling stuff like "ls -R| grep project" 
+			if(strlen(token) > 1)
+			{
+				//TODO Structure this better - perhaps recursively call the command
+				char *pipeArguments;
+				pipeArguments = strtok(token, "|");
+				while(pipeArguments != NULL)
+				{
+					printf("The command line argument to the user command and program is: [%s]\n", pipeArguments );
+					pipeArguments = strtok(NULL, "|");
+				}
+			}
 			printf("Pipe: yes\n");
 		}
 		else if(strstr(token,">>") || strstr(token,">") || strstr(token,"<")) //Output redirected
@@ -84,29 +87,14 @@ void parse_input(char* input)
 		{
 			if(strstr(outputRedirectedTo,">>"))
 			{
-				// if(pipe == true)
-				// {
-				// 	returnCode = 5;
-				// }else
-				// {
-				// 	returnCode = 2;
-				// }
 				printf("Output file: %s\n", token);
 			}
 			else if (strstr(outputRedirectedTo,">"))
 			{
-				// if(pipe == true)
-				// {
-				// 	returnCode = 6;
-				// }else
-				// {
-				// 	returnCode = 3;
-				// }
 				printf("Output overwritten: %s\n", token);
 			}
 			else if(strstr(outputRedirectedTo,"<"))
 			{
-				// returnCode = 1;
 				printf("Input: %s\n", token);
 			}
 		}
