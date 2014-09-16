@@ -59,20 +59,15 @@ void parse_input(char* input)
 			printf("The user command or program is: [%s]\n", token );
 			reset = false;
 		}
-		else if(strstr(token, "|")) //Pipin'
+		else if(strstr(token, "|")) //Piping include a space
 		{
 			reset = true;
-			//Handling stuff like "ls -R| grep project" 
-			if(strlen(token) > 1)
+			if(strlen(token) > 1) //more than 1 character, an argument has been attached to it
 			{
-				//TODO Structure this better - perhaps recursively call the command
-				char *pipeArguments;
-				pipeArguments = strtok(token, "|");
-				while(pipeArguments != NULL)
-				{
-					printf("The command line argument to the user command and program is: [%s]\n", pipeArguments );
-					pipeArguments = strtok(NULL, "|");
-				}
+				char substringToken[3];
+				memcpy( substringToken, &token[0], 2 ); //Is this safe? 
+				substringToken[2] = '\0';
+				printf("The command line argument to the user command and program is: [%s]\n", substringToken );
 			}
 			printf("Pipe: yes\n");
 		}
