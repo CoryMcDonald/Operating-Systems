@@ -23,6 +23,11 @@ void unitTest();
 
 int main ( int argc, char *argv[] )
 {
+    bool debug = true;
+    if(debug == true)
+    {
+        unitTest();
+    }
     if (argc == 2)
     {
         interface(argv[1]);
@@ -64,13 +69,14 @@ bool interface(char *line)
 
     cmd1[0] = NULL;
     cmd2[0] = NULL;
+   
+    i = parse_command(line, cmd1, cmd2, infile, outfile);
+     
+    printf("return code is %d\n", i);
     if(i == 0)
     {
         continueExecute = false;
     }
-    i = parse_command(line, cmd1, cmd2, infile, outfile);
-    printf("return code is %d\n", i);
-
     if(i == 1)
     {
         pid_t pid;
