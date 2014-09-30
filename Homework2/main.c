@@ -23,7 +23,7 @@ void unitTest();
 
 int main ( int argc, char *argv[] )
 {
-    bool debug = true;
+    bool debug = false;
     if(debug == true)
     {
         unitTest();
