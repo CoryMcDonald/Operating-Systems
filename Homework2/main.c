@@ -66,50 +66,51 @@ int main ( int argc, char *argv[] )
     }
     else
     {
-        unitTest();
-        // bool active = true;
-        // char userCommand[BUFSIZE];
-        // while (active)
-        // {
-        //     printf("myshell-%% ");
-        //     //This makes sure we don't go past the limit of 256 characters. That would be very, very bad
-        //     fgets (userCommand, 256, stdin);
-        //     //Removing newline from command
-        //     if ((strlen(userCommand) > 0) && (userCommand[strlen (userCommand) - 1] == '\n'))
-        //         userCommand[strlen (userCommand) - 1] = '\0';
+//         unitTest();
+        bool active = true;
+        char userCommand[BUFSIZE];
+        while (active)
+        {
+            printf("myshell-%% ");
+            //This makes sure we don't go past the limit of 256 characters. That would be very, very bad
+            fgets (userCommand, 256, stdin);
+            //Removing newline from command
+            if ((strlen(userCommand) > 0) && (userCommand[strlen (userCommand) - 1] == '\n'))
+                userCommand[strlen (userCommand) - 1] = '\0';
 
-        //     if (userCommand != NULL)
-        //     {
+            if (userCommand != NULL)
+            {
 
-        //         i = parse_command(userCommand, cmd1, cmd2, infile, outfile);
-        //         printf("return code is %d\n", i);
-
-        //         if ( i < 9)
-        //         {
-        //             k = 0;
-        //             while (cmd1[k] != NULL)
-        //             {
-        //                 // printf("cmd1[%d] = %s\n", k, cmd1[k]);
-        //                 k++;
-        //             };
-        //             k = 0;
-        //             while (cmd2[k] != NULL)
-        //             {
-        //                 // printf("cmd2[%d] = %s\n", k, cmd2[k]);
-        //                 k++;
-        //             };
-        //             if (strlen(infile))
-        //             {
-        //                 // printf("input redirection file name: %s\n", infile);
-        //             }
-        //             if (strlen(outfile))
-        //             {
-        //                 // printf("output redirection file name: %s\n", outfile);
-        //             }
-        //         }
-        //     }
-        // }
-        // printf("usage error\n");
+                i = parse_command(userCommand, cmd1, cmd2, infile, outfile);
+                printf("return code is %d\n", i);
+                if(i==0)
+                {
+                    active = false;
+                }else if ( i < 9)
+                {
+                    k = 0;
+                    while (cmd1[k] != NULL)
+                    {
+                        printf("cmd1[%d] = %s\n", k, cmd1[k]);
+                        k++;
+                    };
+                    k = 0;
+                    while (cmd2[k] != NULL)
+                    {
+                        printf("cmd2[%d] = %s\n", k, cmd2[k]);
+                        k++;
+                    };
+                    if (strlen(infile))
+                    {
+                        printf("input redirection file name: %s\n", infile);
+                    }
+                    if (strlen(outfile))
+                    {
+                        printf("output redirection file name: %s\n", outfile);
+                    }
+                }
+            }
+        }
     }
     return 0;
 }
@@ -255,21 +256,26 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
         {
             reset = false;
             //Return code stuff
-            if (pipe == true)
+            if(strstr(token, "ls") || strstr(token, "wc") || strstr(token, "grep")) //Quick hack to get return code nine to work
             {
+                if (pipe == true)
+                {
 
-                cmd2[cmd2Index] = token + '\0';
-                cmd2Index++;
-
-                returnCode = 5;
-            }
-            else
+                    cmd2[cmd2Index] = token + '\0';
+                    cmd2Index++;
+                    returnCode = 5;
+                }
+                else
+                {
+                    //Simple command
+                    cmd1[cmd1Index] = token + '\0';
+                    cmd1Index++;
+                    returnCode = 1;
+                }
+            }else
             {
-                //Simple command
-                cmd1[cmd1Index] = token + '\0';
-                cmd1Index++;
-
-                returnCode = 1;
+                returnCode = 9;
+                break;
             }
         }
         else if (strstr(token, "|")) //Piping include a space
