@@ -72,21 +72,35 @@ int main ( int argc, char *argv[] )
         while (active)
         {
             printf("myshell-%% ");
+            fflush(stdout); 
             //This makes sure we don't go past the limit of 256 characters. That would be very, very bad
             fgets (userCommand, 256, stdin);
             //Removing newline from command
             if ((strlen(userCommand) > 0) && (userCommand[strlen (userCommand) - 1] == '\n'))
                 userCommand[strlen (userCommand) - 1] = '\0';
-
             if (userCommand != NULL)
             {
 
                 i = parse_command(userCommand, cmd1, cmd2, infile, outfile);
                 printf("return code is %d\n", i);
-                if(i==0)
+                if(i == 0)
                 {
                     active = false;
-                }else if ( i < 9)
+                }
+                if(i == 1)
+                {
+                     pid_t pid;
+                     if ((pid = fork()) == -1)
+                     {
+                       perror("fork error");
+                     }
+                     else if (pid == 0) 
+                     {
+                        execlp(cmd1[0], *cmd1, (char *)NULL);
+                        printf("Return not expected. Must be an execlp error.n");
+                     }
+                }
+                else if (i < 9)
                 {
                     k = 0;
                     while (cmd1[k] != NULL)
