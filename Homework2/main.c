@@ -18,7 +18,7 @@
 
 
 int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outfile);
-void returnTest();
+void unitTest();
 int main ( int argc, char *argv[] )
 {
     char infile[CSTRSIZE];
@@ -66,7 +66,7 @@ int main ( int argc, char *argv[] )
     }
     else
     {
-        returnTest();
+        unitTest();
         // bool active = true;
         // char userCommand[BUFSIZE];
         // while (active)
@@ -113,7 +113,7 @@ int main ( int argc, char *argv[] )
     }
     return 0;
 }
-void returnTest()
+void unitTest()
 {
     char infile[CSTRSIZE];
     char outfile[CSTRSIZE];
@@ -321,6 +321,9 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
                 if (pipe == true)
                 {
                     returnCode = 6;
+                }else
+                {
+                    returnCode = 2;
                 }
             }
         }
