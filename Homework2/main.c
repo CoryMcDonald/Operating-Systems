@@ -39,7 +39,6 @@ int main ( int argc, char *argv[] )
         while (active)
         {
             printf("myshell-%% ");
-            fflush(stdout); 
             //This makes sure we don't go past the limit of 256 characters. That would be very, very bad
             fgets (userCommand, 256, stdin);
             //Removing newline from command
@@ -88,6 +87,9 @@ bool interface(char *line)
         {
             execvp(cmd1[0], cmd1);
             printf("Return not expected. Must be an execlp error.n");
+        }else
+        {
+             waitpid(pid, NULL, 0);  
         }
     }
     else if (i < 9)
