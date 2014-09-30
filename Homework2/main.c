@@ -23,7 +23,7 @@ void unitTest();
 
 int main ( int argc, char *argv[] )
 {
-    bool debug = false;
+    bool debug = true;
     if(debug == true)
     {
         unitTest();
@@ -89,7 +89,7 @@ bool interface(char *line)
         else if (pid == 0) 
         {
             execvp(cmd1[0], cmd1);
-            printf("Return not expected. Must be an execlp error.n");
+            printf("%s: command note found\n", cmd1[0]);
         }else
         {
              waitpid(pid, NULL, 0);  
@@ -266,7 +266,7 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
             //Return code stuff
             //TODO Get files located in system PATH variable. 
             //This way we can make sure that we have all executables
-            if(strstr(token, "ls") || strstr(token, "wc") || strstr(token, "grep")) 
+            if(!strstr(token, "cat") && !strstr(token, "&") ) 
             {
                 if (pipe == true)
                 {
