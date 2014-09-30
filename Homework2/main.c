@@ -49,6 +49,7 @@ int main ( int argc, char *argv[] )
             {
                 if ( interface(userCommand) == true)
                 {
+                    active = false;
                     break;
                 }
             }
@@ -68,13 +69,15 @@ bool interface(char *line)
 
     cmd1[0] = NULL;
     cmd2[0] = NULL;
+    infile[0] = '\0';
+    outfile[0] = '\0';
    
     i = parse_command(line, cmd1, cmd2, infile, outfile);
      
     printf("return code is %d\n", i);
     if(i == 0)
     {
-        continueExecute = false;
+        continueExecute = true;
     }
     if(i == 1)
     {
