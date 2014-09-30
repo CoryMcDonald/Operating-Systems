@@ -261,7 +261,9 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
         {
             reset = false;
             //Return code stuff
-            if(strstr(token, "ls") || strstr(token, "wc") || strstr(token, "grep")) //Quick hack to get return code nine to work
+            //TODO Get files located in system PATH variable. 
+            //This way we can make sure that we have all executables
+            if(strstr(token, "ls") || strstr(token, "wc") || strstr(token, "grep")) 
             {
                 if (pipe == true)
                 {
