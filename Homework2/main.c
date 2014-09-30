@@ -18,55 +18,17 @@
 
 
 int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outfile);
+bool interface(char *line);
 void unitTest();
+
 int main ( int argc, char *argv[] )
 {
-    char infile[CSTRSIZE];
-    char outfile[CSTRSIZE];
-    char *cmd1[CMDSIZE];
-    char *cmd2[CMDSIZE];
-    int i;
-    int k;
-
-    cmd1[0] = NULL;
-    cmd2[0] = NULL;
-
     if (argc == 2)
     {
-        i = parse_command(argv[1], cmd1, cmd2, infile, outfile);
-        printf("return code is %d\n", i);
-        if ( i < 9)
-        {
-            k = 0;
-            while (cmd1[k] != NULL)
-            {
-                printf("cmd1[%d] = %s\n", k, cmd1[k]);
-                k++;
-            };
-            k = 0;
-            while (cmd2[k] != NULL)
-            {
-                printf("cmd2[%d] = %s\n", k, cmd2[k]);
-                k++;
-            };
-            if (strlen(infile))
-            {
-                printf("input redirection file name: %s\n", infile);
-            }
-            if (strlen(outfile))
-            {
-                printf("output redirection file name: %s\n", outfile);
-            }
-
-        }
-        else
-        {
-            printf("not yet handled\n");
-        }
+        interface(argv[1]);
     }
     else
     {
-//         unitTest();
         bool active = true;
         char userCommand[BUFSIZE];
         while (active)
@@ -78,56 +40,77 @@ int main ( int argc, char *argv[] )
             //Removing newline from command
             if ((strlen(userCommand) > 0) && (userCommand[strlen (userCommand) - 1] == '\n'))
                 userCommand[strlen (userCommand) - 1] = '\0';
+            
             if (userCommand != NULL)
             {
-
-                i = parse_command(userCommand, cmd1, cmd2, infile, outfile);
-                printf("return code is %d\n", i);
-                if(i == 0)
+                if ( interface(userCommand) == true)
                 {
-                    active = false;
-                }
-                if(i == 1)
-                {
-                     pid_t pid;
-                     if ((pid = fork()) == -1)
-                     {
-                       perror("fork error");
-                     }
-                     else if (pid == 0) 
-                     {
-                        execlp(cmd1[0], *cmd1, (char *)NULL);
-                        printf("Return not expected. Must be an execlp error.n");
-                     }
-                }
-                else if (i < 9)
-                {
-                    k = 0;
-                    while (cmd1[k] != NULL)
-                    {
-                        printf("cmd1[%d] = %s\n", k, cmd1[k]);
-                        k++;
-                    };
-                    k = 0;
-                    while (cmd2[k] != NULL)
-                    {
-                        printf("cmd2[%d] = %s\n", k, cmd2[k]);
-                        k++;
-                    };
-                    if (strlen(infile))
-                    {
-                        printf("input redirection file name: %s\n", infile);
-                    }
-                    if (strlen(outfile))
-                    {
-                        printf("output redirection file name: %s\n", outfile);
-                    }
+                    break;
                 }
             }
-        }
+       }
     }
     return 0;
 }
+bool interface(char *line)
+{
+    bool continueExecute = false;
+    char infile[CSTRSIZE];
+    char outfile[CSTRSIZE];
+    char *cmd1[CMDSIZE];
+    char *cmd2[CMDSIZE];
+    int i;
+    int k;
+
+    cmd1[0] = NULL;
+    cmd2[0] = NULL;
+    if(i == 0)
+    {
+        continueExecute = false;
+    }
+    i = parse_command(line, cmd1, cmd2, infile, outfile);
+    printf("return code is %d\n", i);
+
+    if(i == 1)
+    {
+        pid_t pid;
+        if ((pid = fork()) == -1)
+        {
+            perror("fork error");
+        }
+        else if (pid == 0) 
+        {
+            execvp(cmd1[0], cmd1);
+            printf("Return not expected. Must be an execlp error.n");
+        }
+    }
+    else if (i < 9)
+    {
+        k = 0;
+        while (cmd1[k] != NULL)
+        {
+            printf("cmd1[%d] = %s\n", k, cmd1[k]);
+            k++;
+        };
+        k = 0;
+        while (cmd2[k] != NULL)
+        {
+            printf("cmd2[%d] = %s\n", k, cmd2[k]);
+            k++;
+        };
+        if (strlen(infile))
+        {
+            printf("input redirection file name: %s\n", infile);
+        }
+        if (strlen(outfile))
+        {
+            printf("output redirection file name: %s\n", outfile);
+        }
+    }
+
+    return continueExecute;
+}
+
 void unitTest()
 {
     char infile[CSTRSIZE];
@@ -238,7 +221,7 @@ void unitTest()
     i = parse_command(returnCode9Test2, cmd1, cmd2, infile, outfile);
     if(i==9) { success++; } else { printf("%s test failed. 9 != %d\n", returnCode9Test2 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
 
-    printf("%d/26 tests completed successfully", success);
+    printf("%d/26 provided tests completed successfully\n", success);
 }
 
 int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outfile)
