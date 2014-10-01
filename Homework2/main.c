@@ -89,7 +89,7 @@ bool interface(char *line)
         else if (pid == 0) 
         {
             execvp(cmd1[0], cmd1);
-            printf("%s: command note found\n", cmd1[0]);
+            printf("%s: command not found\n", cmd1[0]);
         }else
         {
              waitpid(pid, NULL, 0);  
