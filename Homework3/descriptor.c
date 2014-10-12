@@ -31,7 +31,7 @@ int descriptor(){
     if ( (fd = open("foo.txt", O_WRONLY | O_CREAT | O_TRUNC,  S_IRUSR | S_IWUSR)) == -1 ){
         
     }
-    printf("foo.txt file descriptor VALUE = %d\n", fd);
+    printf("foo.txt file descriptor VALUE   = %d\n", fd);
     if ( (fd1 = dup(1)) == -1 ) {
         // error
     };
