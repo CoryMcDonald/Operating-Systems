@@ -41,11 +41,11 @@ int main ( int argc, char *argv[] )
             printf("myshell-%% ");
             //This makes sure we don't go past the limit of 256 characters. That would be very, very bad
             fgets (userCommand, 256, stdin);
-            //Removing newline from command
+            //Removing newline from commandls
             if ((strlen(userCommand) > 0) && (userCommand[strlen (userCommand) - 1] == '\n'))
                 userCommand[strlen (userCommand) - 1] = '\0';
             
-            if (userCommand != NULL)
+            if (userCommand[0] != '\0' && userCommand != NULL)
             {
                 if ( interface(userCommand) == true)
                 {
@@ -74,7 +74,6 @@ bool interface(char *line)
    
     i = parse_command(line, cmd1, cmd2, infile, outfile);
      
-    printf("return code is %d\n", i);
     if(i == 0)
     {
         continueExecute = true;
@@ -85,11 +84,12 @@ bool interface(char *line)
         if ((pid = fork()) == -1)
         {
             perror("fork error");
+            i=9;
         }
         else if (pid == 0) 
         {
             execvp(cmd1[0], cmd1);
-            printf("%s: command note found\n", cmd1[0]);
+            printf("%s: command not found\n", cmd1[0]);
         }else
         {
              waitpid(pid, NULL, 0);  
@@ -118,6 +118,7 @@ bool interface(char *line)
             printf("output redirection file name: %s\n", outfile);
         }
     }
+    printf("return code is %d\n", i);
 
     return continueExecute;
 }
