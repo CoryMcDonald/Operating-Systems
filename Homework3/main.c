@@ -373,7 +373,6 @@ void exec_cmd(char** cmd1)
   if ((pid = fork()) == -1)
   {
       perror("fork error");
-      i=9;
   }
   else if (pid == 0)
   {
