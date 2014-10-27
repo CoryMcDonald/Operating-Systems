@@ -30,6 +30,10 @@ void exec_pipe_opt_in_write(char** cmd1,char** cmd2,char* infile,char* outfile);
 bool interface(char *line);
 void unitTest();
 
+// Bad practices ftw
+char infile[CSTRSIZE];
+char outfile[CSTRSIZE];
+
 int main ( int argc, char *argv[] )
 {
     bool debug = true;
@@ -69,8 +73,6 @@ int main ( int argc, char *argv[] )
 bool interface(char *line)
 {
     bool continueExecute = false;
-    char infile[CSTRSIZE];
-    char outfile[CSTRSIZE];
     char *cmd1[CMDSIZE];
     char *cmd2[CMDSIZE];
     int i;
@@ -92,8 +94,13 @@ bool interface(char *line)
       case 1:
         exec_cmd(cmd1);
         break;
+      case 2:
+        printf("input redirection file name: %s\n", infile);
+//      exec_cmd_in(cmd1, infile);
+        break;
       default:
         printf("Not handled at this time");
+        break;
     }
     if (i < 9)
     {
@@ -125,8 +132,6 @@ bool interface(char *line)
 
 void unitTest()
 {
-    char infile[CSTRSIZE];
-    char outfile[CSTRSIZE];
     char *cmd1[CMDSIZE];
     char *cmd2[CMDSIZE];
     int i;
@@ -265,7 +270,6 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
         {
             reset = false;
             //Return code stuff
-            //TODO Get files located in system PATH variable.
             //This way we can make sure that we have all executables
             if(!strstr(token, "cat") && !strstr(token, "&") )
             {
@@ -340,6 +344,8 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
                     returnCode = 6;
                 }else
                 {
+                    infile = token + '\0';                
+                     
                     returnCode = 2;
                 }
             }
@@ -356,6 +362,7 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
                 cmd1[cmd1Index] =  token + '\0';
                 cmd1Index++;
             }
+
         }
 
 
@@ -385,7 +392,20 @@ void exec_cmd(char** cmd1)
 }
 void exec_cmd_in(char** cmd1, char* infile)
 {
-  
+    pid_t pid;
+    if ((pid = fork()) == -1)
+    {
+        perror("fork error");
+    }
+    else if (pid == 0)
+    {
+        int fd = open(infile, O_RDONLY);
+        dup2(fd, 0);
+        execvp(cmd1[0], cmd1);
+    }else
+    {
+        waitpid(pid, NULL, 0);
+    }
 }
 void exec_cmd_opt_in_append(char** cmd1, char* infile, char* outfile)
 {
