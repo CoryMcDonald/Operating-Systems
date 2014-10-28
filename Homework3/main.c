@@ -97,19 +97,19 @@ bool interface(char *line)
         exec_cmd(cmd1);
         break;
       case 2:
-        exec_cmd_in(cmd1, infile);        
+        exec_cmd_in(cmd1, infile);
         break;
       case 3:
-        exec_cmd_opt_in_append(cmd1, infile, outfile);    
+        exec_cmd_opt_in_append(cmd1, infile, outfile);
         break;
       case 4:
         printf("todo \n");
         break;
       case 5:
-        exec_pipe(cmd1, cmd2);    
+        exec_pipe(cmd1, cmd2);
         break;
       case 6:
-        exec_pipe_in(cmd1, cmd2,infile);    
+        exec_pipe_in(cmd1, cmd2,infile);
         break;
       default:
         printf("Not handled at this time");
@@ -236,7 +236,7 @@ void unitTest()
     i = parse_command(returnCode7Test2, cmd1, cmd2, infile, outfile);
     if(i==7) { success++; } else { printf("%s test failed. 7 != %d\n", returnCode7Test2 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
     i = parse_command(returnCode7Test3, cmd1, cmd2, infile, outfile);
-    if(i==7) { success++; } else { printf("%s test failed. 7 != %d\n", returnCode7Test3 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
+    if(i==7) { success++; } else { printf("%s   test failed. 7 != %d\n", returnCode7Test3 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
     i = parse_command(returnCode7Test4, cmd1, cmd2, infile, outfile);
     if(i==7) { success++; } else { printf("%s test failed. 7 != %d\n", returnCode7Test4 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
 
@@ -358,12 +358,12 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
             }
             else if (strstr(outputRedirectedTo, "<"))
             {
-                strcpy(infile, token);                   
+                strcpy(infile, token);
                 if (pipe == true)
                 {
                     returnCode = 6;
                 }else
-                {                                     
+                {
                     returnCode = 2;
                 }
             }
@@ -416,7 +416,7 @@ void exec_cmd_in(char** cmd1, char* infile)
         perror("fork error");
     }
     else if (pid == 0)
-    {   
+    {
         int fd = open(infile, O_RDONLY);
         dup2(fd, 0);
         execvp(cmd1[0], cmd1);
@@ -434,7 +434,7 @@ void exec_cmd_opt_in_append(char** cmd1, char* infile, char* outfile)
     }
     else if (pid == 0)
     {
-        if(outfile[0] != '\0')            
+        if(outfile[0] != '\0')
         {
             int outFD = open(outfile, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
             if(infile[0] != '\0')
@@ -444,7 +444,7 @@ void exec_cmd_opt_in_append(char** cmd1, char* infile, char* outfile)
             }
             dup2(outFD, 1);
             execvp(cmd1[0], cmd1);
-        }        
+        }
     }
     else
     {
@@ -457,78 +457,51 @@ void exec_cmd_opt_in_write(char** cmd1, char* infile, char* outfile)
 }
 void exec_pipe(char** cmd1, char** cmd2)
 {
-    int des_p[2];
-    if(pipe(des_p) == -1) //Create the pipe
+  pid_t firstFork;
+  pid_t secondFork;
+  pid_t pid2;
+  int pipefd[2];
+  
+  if ((firstFork = fork()) == -1)
+  {
+      perror("fork error");
+  }
+  else if (firstFork == 0)
+  {
+    //This will execute the second command
+    if ((secondFork = fork()) == -1)
     {
-      perror("Pipe failed");
-      exit(1);
-    }
-
-    if(fork() == 0) //We're in the first command
+        perror("fork error");
+    }else if(secondFork == 0)
     {
-        close(1); //Close stdout
-        dup(des_p[1]); //Replace stdout with pipe write 
-        close(des_p[0]); //Close pipe read
-        close(des_p[1]); 
-
-        execvp(cmd1[0], cmd1);
-        perror("cmd1 failed");
-        exit(1); //Need to exit or will be stuck in wait
-    }
-
-    //Forking for the pipe
-    if(fork() == 0)
+      dup2(pipefd[0], 0); // replace standard input with input of cmd1
+      close(pipefd[1]); //Close standard output of the pipe
+      execvp(cmd2[0], cmd2);
+      printf("%s: command not found\n", cmd1[0]);
+    }else
     {
-        close(0);  //closing stdin
-        dup(des_p[0]);  //replacing stdin with pipe read
-        close(des_p[1]); //closing pipe write
-        close(des_p[0]);
-
-        execvp(cmd2[0], cmd2);
-        perror("cmd2 failed");
-        exit(1); //Need to exit or will be stuck in wait
-
+      //Wait for the fork before continuing
+      waitpid(secondFork, NULL, 0);
     }
-
-    close(des_p[0]); //Trying to prevent it from hanging
-    close(des_p[1]);
-    wait(0);
-    wait(0);
+    
+    // replace standard output with output part of pipe
+    dup2(pipefd[1], 1); //So the output of CMD1 will be redirected
+    // close unused input half of pipe
+    close(pipefd[0]);
+    
+    execvp(cmd1[0], cmd1);
+    printf("%s: command not found\n", cmd1[0]);
+      
+  }else
+  {
+    // Parent process, wait for the firstFork and secondFork to finish
+    waitpid(firstFork, NULL, 0);
+  }
   
 }
 void exec_pipe_in(char** cmd1, char** cmd2, char* infile)
 {
-    int pipefd[2];
-    pid_t pid;
-
-    pipe(pipefd);
-
-    if((pid=fork())==-1)
-    {
-      perror("error");
-    }
-    else if (pid == 0)
-    {
-      close(pipefd[1]);
-
-      printf("second\n");
-      // execute grep
-      char *grep_args[] = {"grep", "4", NULL};
-      execvp("grep", grep_args);
-       exit(1);
-    }
-    else
-    {
-        
-      printf("first\n");
-      dup2(pipefd[1], 1);
-      close(pipefd[0]);
-      char *cat_args[] = {"ls", "-l", NULL};
-      execvp("ls", cat_args);
-//         exit(1);
-    waitpid(pid, NULL, 0);
-    }
-
+    
 }
 void exec_pipe_opt_in_append(char** cmd1,char** cmd2,char* infile,char* outfile)
 {
