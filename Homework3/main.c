@@ -1,14 +1,14 @@
 //Author: Cory McDonald
 
-#include &lt;stdio.h&gt;
-#include &lt;time.h&gt;
-#include &lt;stdlib.h&gt;
-#include &lt;limits.h&gt;
-#include &lt;string.h&gt;
-#include &lt;unistd.h&gt;
-#include &lt;fcntl.h&gt;
-#include &lt;sys/wait.h&gt;
-#include &lt;stdbool.h&gt;
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+#include <stdbool.h>
 
 #define BUFSIZE 1024
 #define CSTRSIZE 100
@@ -52,7 +52,7 @@ int main ( int argc, char *argv[] )
             //This makes sure we don't go past the limit of 256 characters. That would be very, very bad
             fgets (userCommand, 256, stdin);
             //Removing newline from commandls
-            if ((strlen(userCommand) &gt; 0) && (userCommand[strlen (userCommand) - 1] == '\n'))
+            if ((strlen(userCommand) > 0) && (userCommand[strlen (userCommand) - 1] == '\n'))
             userCommand[strlen (userCommand) - 1] = '\0';
             
             if (userCommand[0] != '\0' && userCommand != NULL)
@@ -77,7 +77,6 @@ bool interface(char *line)
     char *cmd1[CMDSIZE];
     char *cmd2[CMDSIZE];
     int i;
-    int k;
     
     cmd1[0] = NULL;
     cmd2[0] = NULL;
@@ -115,29 +114,29 @@ bool interface(char *line)
         printf("Not handled at this time");
         break;
     }
-    if (i &lt; 9)
-    {
-        k = 0;
-        while (cmd1[k] != NULL)
-        {
-            printf("cmd1[%d] = %s\n", k, cmd1[k]);
-            k++;
-        };
-        k = 0;
-        while (cmd2[k] != NULL)
-        {
-            printf("cmd2[%d] = %s\n", k, cmd2[k]);
-            k++;
-        };
-        if (strlen(infile))
-        {
-            printf("input redirection file name: %s\n", infile);
-        }
-        if (strlen(outfile))
-        {
-            printf("output redirection file name: %s\n", outfile);
-        }
-    }
+//     if (i < 9)
+//     {
+//         k = 0;
+//         while (cmd1[k] != NULL)
+//         {
+//             printf("cmd1[%d] = %s\n", k, cmd1[k]);
+//             k++;
+//         };
+//         k = 0;
+//         while (cmd2[k] != NULL)
+//         {
+//             printf("cmd2[%d] = %s\n", k, cmd2[k]);
+//             k++;
+//         };
+//         if (strlen(infile))
+//         {
+//             printf("input redirection file name: %s\n", infile);
+//         }
+//         if (strlen(outfile))
+//         {
+//             printf("output redirection file name: %s\n", outfile);
+//         }
+//     }
     printf("return code is %d\n", i);
     
     return continueExecute;
@@ -160,34 +159,34 @@ void unitTest()
     char returnCode1Test2[50] = "ls –l";
     char returnCode1Test3[50] = "ls –l –a";
     
-    char returnCode2Test1[50] = "wc &lt; filename";
+    char returnCode2Test1[50] = "wc < filename";
     
-    char returnCode3Test1[50] = "ls &gt;&gt; outputfile";
-    char returnCode3Test2[50] = "ls –l &gt;&gt; outputfile";
-    char returnCode3Test3[50] = "ls –l –a &gt;&gt; outputfile";
-    char returnCode3Test4[50] = "wc &lt; filename &gt;&gt; outputfile";
+    char returnCode3Test1[50] = "ls >> outputfile";
+    char returnCode3Test2[50] = "ls –l >> outputfile";
+    char returnCode3Test3[50] = "ls –l –a >> outputfile";
+    char returnCode3Test4[50] = "wc < filename >> outputfile";
     
-    char returnCode4Test1[50] = "ls &gt; outputfile";
-    char returnCode4Test2[50] = "ls –l &gt; outputfile";
-    char returnCode4Test3[50] = "ls –l –a &gt; outputfile";
-    char returnCode4Test4[50] = "wc &lt; filename &gt; outputfile";
+    char returnCode4Test1[50] = "ls > outputfile";
+    char returnCode4Test2[50] = "ls –l > outputfile";
+    char returnCode4Test3[50] = "ls –l –a > outputfile";
+    char returnCode4Test4[50] = "wc < filename > outputfile";
     
     
     char returnCode5Test1[50] = "ls | grep c";
     char returnCode5Test2[50] = "ls –l | grep c";
     char returnCode5Test3[50] = "ls –l –a | grep c";
     
-    char returnCode6Test1[50] = "wc &lt; filename | grep 3";
+    char returnCode6Test1[50] = "wc < filename | grep 3";
     
-    char returnCode7Test1[50] = "ls | grep c &gt;&gt; outputfile";
-    char returnCode7Test2[50] = "ls –l | grep c &gt;&gt; outputfile";
-    char returnCode7Test3[50] = "ls –l –a | grep c &gt;&gt; outputfile";
-    char returnCode7Test4[50] = "wc &lt; filename | grep 3 &gt;&gt; outputfile";
+    char returnCode7Test1[50] = "ls | grep c >> outputfile";
+    char returnCode7Test2[50] = "ls –l | grep c >> outputfile";
+    char returnCode7Test3[50] = "ls –l –a | grep c >> outputfile";
+    char returnCode7Test4[50] = "wc < filename | grep 3 >> outputfile";
     
-    char returnCode8Test1[50] = "ls | grep c &gt; outputfile";
-    char returnCode8Test2[50] = "ls –l | grep c &gt; outputfile";
-    char returnCode8Test3[50] = "ls –l –a | grep c &gt; outputfile";
-    char returnCode8Test4[50] = "wc &lt; filename | grep 3 &gt; outputfile";
+    char returnCode8Test1[50] = "ls | grep c > outputfile";
+    char returnCode8Test2[50] = "ls –l | grep c > outputfile";
+    char returnCode8Test3[50] = "ls –l –a | grep c > outputfile";
+    char returnCode8Test4[50] = "wc < filename | grep 3 > outputfile";
     
     char returnCode9Test1[50] = "cat file1 | grep c | wc";
     char returnCode9Test2[50] = "netbeans&";
@@ -265,7 +264,7 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
     int cmd2Index = 0;
     
     char delimin[2] = " ";
-    char outputRedirectedTo[3]; //Could be &gt;&gt;,&gt;,&lt;
+    char outputRedirectedTo[3]; //Could be >>,>,<
     char *token;
     char *copyOfLine = (char *) malloc (strlen(line) + 1);
     
@@ -315,7 +314,7 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
         {
             reset = true;
             pipe = true;
-            if (strlen(token) &gt; 1) //more than 1 character, an argument has been attached to it
+            if (strlen(token) > 1) //more than 1 character, an argument has been attached to it
             {
                 char substringToken[3];
                 memcpy( substringToken, &token[0], 2 ); //Figure out what the hell i'm doing here.
@@ -324,7 +323,7 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
             }
             // printf("Pipe: yes\n");
         }
-        else if (strstr(token, "&gt;&gt;") || strstr(token, "&gt;") || strstr(token, "&lt;")) //Output redirected
+        else if (strstr(token, ">>") || strstr(token, ">") || strstr(token, "<")) //Output redirected
         {
             isOutputRedirected = true;
             strncpy(outputRedirectedTo, token, sizeof(outputRedirectedTo));
@@ -333,7 +332,7 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
         }
         else if (isOutputRedirected == true)
         {
-            if (strstr(outputRedirectedTo, "&gt;&gt;"))
+            if (strstr(outputRedirectedTo, ">>"))
             {
                 strcpy(outfile, token);
                 if (pipe == true)
@@ -345,7 +344,7 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
                     returnCode = 3;
                 }
             }
-            else if (strstr(outputRedirectedTo, "&gt;"))
+            else if (strstr(outputRedirectedTo, ">"))
             {
                 if (pipe == true)
                 {
@@ -356,7 +355,7 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
                     returnCode = 4;
                 }
             }
-            else if (strstr(outputRedirectedTo, "&lt;"))
+            else if (strstr(outputRedirectedTo, "<"))
             {
                 strcpy(infile, token);
                 if (pipe == true)
@@ -419,6 +418,7 @@ void exec_cmd_in(char** cmd1, char* infile)
     {
         int fd = open(infile, O_RDONLY);
         dup2(fd, 0);
+        close(fd);
         execvp(cmd1[0], cmd1);
         //         todo close this?
     }else
@@ -467,6 +467,47 @@ void exec_pipe(char** cmd1, char** cmd2)
     int pid2;
     int pid1;
     
+    pipe(pipefd);
+        
+    if ((pid1 = fork()) == -1)
+    {
+        perror("fork error");
+    }
+    else if (pid1 == 0)
+    {
+        pid2 = fork();
+        
+        if (pid2 == 0) //CHILD
+        {    
+            wait(0);
+            dup2(pipefd[0], STDIN_FILENO);
+            close(pipefd[1]);            
+            
+            execvp(cmd2[0], cmd2);
+            printf("Wrong cmd2\n");
+            exit(1);
+        }
+        else 
+        {   
+            
+            //PARENT
+            dup2(pipefd[1], STDOUT_FILENO);
+            close(pipefd[0]);            
+            execvp(cmd1[0], cmd1);
+            printf("Wrong cmd1\n");
+            exit(1);
+        }
+        
+    }
+    wait(0);        
+}
+void exec_pipe_in(char** cmd1, char** cmd2, char* infile)
+{
+    int pipefd[2];
+    int pid2;
+    
+    int pid1;
+    
     if ((pid1 = fork()) == -1)
     {
         perror("fork error");
@@ -479,6 +520,8 @@ void exec_pipe(char** cmd1, char** cmd2)
         
         if (pid2 == 0) //CHILD
         {
+            wait(0);
+            close(pipefd[1]); //closing previously open 
             dup2(pipefd[0], STDIN_FILENO);
             close(pipefd[1]);
             
@@ -488,28 +531,23 @@ void exec_pipe(char** cmd1, char** cmd2)
         }
         else //PARENT
         {
-            dup2(pipefd[1], STDOUT_FILENO);
+            close(pipefd[1]);
+            int fd = open(infile, O_RDONLY);
+            dup2(fd, 0);
+            close(fd);
             
-            // close unused unput half of pipe
-            
+            dup2(pipefd[1], STDOUT_FILENO);            
             close(pipefd[0]);
+            
             
             // execute cat
             execvp(cmd1[0], cmd1);
             printf("Wrong cmd1");
             exit(1);
-            
         }
+        
     }
-    else
-    {
-        waitpid(pid1, NULL, 0);
-        waitpid(pid2, NULL, 0);
-    }
-}
-void exec_pipe_in(char** cmd1, char** cmd2, char* infile)
-{
-    
+    wait(0);
 }
 void exec_pipe_opt_in_append(char** cmd1,char** cmd2,char* infile,char* outfile)
 {
