@@ -499,55 +499,56 @@ void exec_pipe(char** cmd1, char** cmd2)
         }
         
     }
-    wait(0);        
+    wait(0);     
+    close(pipefd[0]);
+    close(pipefd[1]);
 }
 void exec_pipe_in(char** cmd1, char** cmd2, char* infile)
 {
     int pipefd[2];
     int pid2;
-    
     int pid1;
+    int fdw, fdr;
     
+    pipe(pipefd);
+    printf("CALLING FORK ON PID1\n");
     if ((pid1 = fork()) == -1)
     {
         perror("fork error");
     }
     else if (pid1 == 0)
     {
-        pipe(pipefd);
-        
         pid2 = fork();
         
         if (pid2 == 0) //CHILD
-        {
+        {    
             wait(0);
-            close(pipefd[1]); //closing previously open 
-            dup2(pipefd[0], STDIN_FILENO);
             close(pipefd[1]);
+            dup2(pipefd[0], STDIN_FILENO);
+            close(pipefd[0]); 
             
             execvp(cmd2[0], cmd2);
-            printf("Wrong cmd2");
+            printf("%s: command not found\n", cmd2[0]);
             exit(1);
         }
-        else //PARENT
-        {
-            close(pipefd[1]);
+        else 
+        {   
             int fd = open(infile, O_RDONLY);
-            dup2(fd, 0);
-            close(fd);
-            
-            dup2(pipefd[1], STDOUT_FILENO);            
             close(pipefd[0]);
+            dup2(pipefd[1], STDOUT_FILENO);
+            dup2(fd, STDIN_FILENO);
+            close(fd);
+//             close(pipefd[1]);     
             
-            
-            // execute cat
             execvp(cmd1[0], cmd1);
-            printf("Wrong cmd1");
+            printf("%s: command not found\n", cmd1[0]);
             exit(1);
-        }
-        
+        }  
     }
-    wait(0);
+    close(pipefd[0]);
+    close(pipefd[1]);
+    printf("Parent ended");
+    wait(0);                 
 }
 void exec_pipe_opt_in_append(char** cmd1,char** cmd2,char* infile,char* outfile)
 {
