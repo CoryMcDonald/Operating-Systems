@@ -1,0 +1,11 @@
+total 48
+drwxr-xr-x 2 www-data www-data  4096 Sep 30 01:35 Homework1
+drwxr-xr-x 2 www-data www-data  4096 Oct 23 14:33 Homework2
+drwxr-xr-x 2 www-data www-data  4096 Oct 28 15:18 Homework3
+-rwxr-xr-x 1 www-data www-data 17636 Sep 30 15:27 a.out
+-rw------- 1 www-data www-data    77 Oct 23 14:53 foo.txt
+-rw------- 1 www-data www-data     0 Oct 28 17:35 ls.txt
+-rw------- 1 www-data www-data    62 Oct 27 01:15 outfile
+-rw-r--r-- 1 www-data www-data   302 Oct 23 14:33 readme.md
+-rw------- 1 www-data www-data     9 Oct 27 01:20 testfile
+ 4 13 77
