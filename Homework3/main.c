@@ -30,9 +30,6 @@ void exec_pipe_opt_in_write(char** cmd1,char** cmd2,char* infile,char* outfile);
 bool interface(char *line);
 void unitTest();
 
-// Bad practices ftw
-char infile[CSTRSIZE];
-char outfile[CSTRSIZE];
 
 int main ( int argc, char *argv[] )
 {
@@ -72,6 +69,10 @@ int main ( int argc, char *argv[] )
 }
 bool interface(char *line)
 {
+
+    // Bad practices ftw
+    char infile[CSTRSIZE];
+    char outfile[CSTRSIZE];
     bool continueExecute = false;
     char *cmd1[CMDSIZE];
     char *cmd2[CMDSIZE];
@@ -82,9 +83,10 @@ bool interface(char *line)
     cmd2[0] = NULL;
     infile[0] = '\0';
     outfile[0] = '\0';
-   
+       
     i = parse_command(line, cmd1, cmd2, infile, outfile);
      
+    
     if(i == 0)
     {
         continueExecute = true;
@@ -95,8 +97,19 @@ bool interface(char *line)
         exec_cmd(cmd1);
         break;
       case 2:
-        printf("input redirection file name: %s\n", infile);
-//      exec_cmd_in(cmd1, infile);
+        exec_cmd_in(cmd1, infile);        
+        break;
+      case 3:
+        exec_cmd_opt_in_append(cmd1, infile, outfile);    
+        break;
+      case 4:
+        printf("todo \n");
+        break;
+      case 5:
+        exec_pipe(cmd1, cmd2);    
+        break;
+      case 6:
+        exec_pipe_in(cmd1, cmd2,infile);    
         break;
       default:
         printf("Not handled at this time");
@@ -132,6 +145,9 @@ bool interface(char *line)
 
 void unitTest()
 {
+    // Bad practices ftw
+    char infile[CSTRSIZE];
+    char outfile[CSTRSIZE];
     char *cmd1[CMDSIZE];
     char *cmd2[CMDSIZE];
     int i;
@@ -139,6 +155,7 @@ void unitTest()
 
     cmd1[0] = NULL;
     cmd2[0] = NULL;
+    
     char returnCode1Test1[50] = "ls";
     char returnCode1Test2[50] = "ls –l";
     char returnCode1Test3[50] = "ls –l –a";
@@ -271,7 +288,7 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
             reset = false;
             //Return code stuff
             //This way we can make sure that we have all executables
-            if(!strstr(token, "cat") && !strstr(token, "&") )
+            if(true)
             {
                 if (pipe == true)
                 {
@@ -279,6 +296,7 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
                     cmd2[cmd2Index] = token + '\0';
                     cmd2Index++;
                     returnCode = 5;
+                    
                 }
                 else
                 {
@@ -317,6 +335,7 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
         {
             if (strstr(outputRedirectedTo, ">>"))
             {
+                strcpy(outfile, token);
                 if (pipe == true)
                 {
                     returnCode = 7;
@@ -339,13 +358,12 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
             }
             else if (strstr(outputRedirectedTo, "<"))
             {
+                strcpy(infile, token);                   
                 if (pipe == true)
                 {
                     returnCode = 6;
                 }else
-                {
-                    infile = token + '\0';                
-                     
+                {                                     
                     returnCode = 2;
                 }
             }
@@ -398,7 +416,7 @@ void exec_cmd_in(char** cmd1, char* infile)
         perror("fork error");
     }
     else if (pid == 0)
-    {
+    {   
         int fd = open(infile, O_RDONLY);
         dup2(fd, 0);
         execvp(cmd1[0], cmd1);
@@ -409,19 +427,108 @@ void exec_cmd_in(char** cmd1, char* infile)
 }
 void exec_cmd_opt_in_append(char** cmd1, char* infile, char* outfile)
 {
-  
+    pid_t pid;
+    if ((pid = fork()) == -1)
+    {
+        perror("fork error");
+    }
+    else if (pid == 0)
+    {
+        if(outfile[0] != '\0')            
+        {
+            int outFD = open(outfile, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+            if(infile[0] != '\0')
+            {
+                int inFD = open(infile, O_RDONLY);
+                dup2(inFD, 0);
+            }
+            dup2(outFD, 1);
+            execvp(cmd1[0], cmd1);
+        }        
+    }
+    else
+    {
+        waitpid(pid, NULL, 0);
+    }
 }
 void exec_cmd_opt_in_write(char** cmd1, char* infile, char* outfile)
 {
-  
+
 }
 void exec_pipe(char** cmd1, char** cmd2)
 {
+    int des_p[2];
+    if(pipe(des_p) == -1) //Create the pipe
+    {
+      perror("Pipe failed");
+      exit(1);
+    }
+
+    if(fork() == 0) //We're in the first command
+    {
+        close(1); //Close stdout
+        dup(des_p[1]); //Replace stdout with pipe write 
+        close(des_p[0]); //Close pipe read
+        close(des_p[1]); 
+
+        execvp(cmd1[0], cmd1);
+        perror("cmd1 failed");
+        exit(1); //Need to exit or will be stuck in wait
+    }
+
+    //Forking for the pipe
+    if(fork() == 0)
+    {
+        close(0);  //closing stdin
+        dup(des_p[0]);  //replacing stdin with pipe read
+        close(des_p[1]); //closing pipe write
+        close(des_p[0]);
+
+        execvp(cmd2[0], cmd2);
+        perror("cmd2 failed");
+        exit(1); //Need to exit or will be stuck in wait
+
+    }
+
+    close(des_p[0]); //Trying to prevent it from hanging
+    close(des_p[1]);
+    wait(0);
+    wait(0);
   
 }
 void exec_pipe_in(char** cmd1, char** cmd2, char* infile)
 {
-  
+    int pipefd[2];
+    pid_t pid;
+
+    pipe(pipefd);
+
+    if((pid=fork())==-1)
+    {
+      perror("error");
+    }
+    else if (pid == 0)
+    {
+      close(pipefd[1]);
+
+      printf("second\n");
+      // execute grep
+      char *grep_args[] = {"grep", "4", NULL};
+      execvp("grep", grep_args);
+       exit(1);
+    }
+    else
+    {
+        
+      printf("first\n");
+      dup2(pipefd[1], 1);
+      close(pipefd[0]);
+      char *cat_args[] = {"ls", "-l", NULL};
+      execvp("ls", cat_args);
+//         exit(1);
+    waitpid(pid, NULL, 0);
+    }
+
 }
 void exec_pipe_opt_in_append(char** cmd1,char** cmd2,char* infile,char* outfile)
 {
