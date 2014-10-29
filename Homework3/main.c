@@ -77,15 +77,14 @@ bool interface(char *line)
     char *cmd1[CMDSIZE];
     char *cmd2[CMDSIZE];
     int i;
-    
+    int k;
     cmd1[0] = NULL;
     cmd2[0] = NULL;
     infile[0] = '\0';
     outfile[0] = '\0';
     
     i = parse_command(line, cmd1, cmd2, infile, outfile);
-    
-    
+    printf("Finished parse command");
     if(i == 0)
     {
         continueExecute = true;
@@ -108,35 +107,36 @@ bool interface(char *line)
         exec_pipe(cmd1, cmd2);
         break;
         case 6:
-        exec_pipe_in(cmd1, cmd2,infile);
+//         exec_pipe_in(cmd1, cmd2,infile);
         break;
         default:
         printf("Not handled at this time");
         break;
     }
-//     if (i < 9)
-//     {
-//         k = 0;
-//         while (cmd1[k] != NULL)
-//         {
-//             printf("cmd1[%d] = %s\n", k, cmd1[k]);
-//             k++;
-//         };
-//         k = 0;
-//         while (cmd2[k] != NULL)
-//         {
-//             printf("cmd2[%d] = %s\n", k, cmd2[k]);
-//             k++;
-//         };
-//         if (strlen(infile))
-//         {
-//             printf("input redirection file name: %s\n", infile);
-//         }
-//         if (strlen(outfile))
-//         {
-//             printf("output redirection file name: %s\n", outfile);
-//         }
-//     }
+    printf("lolwut");
+    if (i < 9)
+    {
+        k = 0;
+        while (cmd1[k] != NULL)
+        {
+            printf("cmd1[%d] = %s\n", k, cmd1[k]);
+            k++;
+        };
+        k = 0;
+        while (cmd2[k] != NULL)
+        {
+            printf("cmd2[%d] = %s\n", k, cmd2[k]);
+            k++;
+        };
+        if (strlen(infile))
+        {
+            printf("input redirection file name: %s\n", infile);
+        }
+        if (strlen(outfile))
+        {
+            printf("output redirection file name: %s\n", outfile);
+        }
+    }
     printf("return code is %d\n", i);
     
     return continueExecute;
@@ -283,7 +283,8 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
             break;
         }
         else if (reset == true) //Taking in command, otherwise we will assume it is an argument
-        {
+        {            
+            
             reset = false;
             //Return code stuff
             //This way we can make sure that we have all executables
@@ -294,8 +295,14 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
                     
                     cmd2[cmd2Index] = token + '\0';
                     cmd2Index++;
-                    returnCode = 5;
-                    
+                    if(isOutputRedirected == true)
+                    {
+                       returnCode += 4;   
+                       isOutputRedirected = false;
+                    }else
+                    {
+                        returnCode = 5;
+                    }
                 }
                 else
                 {
@@ -319,28 +326,25 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
                 char substringToken[3];
                 memcpy( substringToken, &token[0], 2 ); //Figure out what the hell i'm doing here.
                 substringToken[2] = '\0';
-                // printf("The command line argument to the user command and program is: [%s]\n", substringToken );
             }
-            // printf("Pipe: yes\n");
         }
         else if (strstr(token, ">>") || strstr(token, ">") || strstr(token, "<")) //Output redirected
         {
             isOutputRedirected = true;
             strncpy(outputRedirectedTo, token, sizeof(outputRedirectedTo));
             outputRedirectedTo[sizeof(outputRedirectedTo) - 1] = '\0';
-            // printf("Output Direction: %s\n", token);
         }
         else if (isOutputRedirected == true)
         {
             if (strstr(outputRedirectedTo, ">>"))
             {
-                strcpy(outfile, token);
                 if (pipe == true)
                 {
                     returnCode = 7;
                 }
                 else
                 {
+                    strcpy(outfile, token);
                     returnCode = 3;
                 }
             }
@@ -357,31 +361,31 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
             }
             else if (strstr(outputRedirectedTo, "<"))
             {
-                strcpy(infile, token);
+
                 if (pipe == true)
                 {
                     returnCode = 6;
                 }else
                 {
+                    strcpy(infile, token);
                     returnCode = 2;
                 }
             }
+
         }
         else
         {
             if (pipe == true)
             {
-                cmd2[cmd2Index] =  token + '\0';
+                cmd2[cmd2Index] = token + '\0';
                 cmd2Index++;
             }
             else
             {
                 cmd1[cmd1Index] =  token + '\0';
                 cmd1Index++;
-            }
-            
-        }
-        
+            }       
+        }       
         
         token = strtok(NULL, delimin);
     }
