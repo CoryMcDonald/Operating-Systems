@@ -316,6 +316,7 @@ void exec_cmd_in(char** cmd1, char* infile)
         close(fd);
         logInfo("exec_cmd_in: Executing command");
         execvp(cmd1[0], cmd1);
+        exit(1);
     }else
     {
         waitpid(pid, NULL, 0);
@@ -348,6 +349,7 @@ void exec_cmd_opt_in_append(char** cmd1, char* infile, char* outfile)
             close(outFD);
             logInfo("exec_cmd_opt_in: Executing command");
             execvp(cmd1[0], cmd1);
+            exit(1);
         }
     }
     else
@@ -370,7 +372,7 @@ void exec_cmd_opt_in_write(char** cmd1, char* infile, char* outfile)
         logInfo("exec_cmd_opt_in_write: Opening outfile");
         if(outfile[0] != '\0')
         {
-            int outFD = open(outfile, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+            int outFD = open(outfile, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
             if(infile[0] != '\0')
             {
                 int inFD = open(infile, O_RDONLY);
@@ -382,6 +384,7 @@ void exec_cmd_opt_in_write(char** cmd1, char* infile, char* outfile)
             
             logInfo("exec_cmd_opt_in_write: Executing command");
             execvp(cmd1[0], cmd1);
+            exit(1);
         }
     }
     else
@@ -395,10 +398,9 @@ void exec_pipe(char** cmd1, char** cmd2)
     int pipefd[2];
     int pid2;
     int pid1;
-
+    
     logInfo("exec_pipe: Creating pipe");
     pipe(pipefd);
-
     logInfo("exec_pipe: Forking");
     if ((pid1 = fork()) == -1)
     {
@@ -407,30 +409,32 @@ void exec_pipe(char** cmd1, char** cmd2)
     else if (pid1 == 0)
     {
         logInfo("exec_pipe: Executing cmd1");
-        
-        dup2(fd, 0);
-        close(fd);
+
+        close(pipefd[0]);
+        dup2(pipefd[1], 1);
         close(pipefd[1]);
-        
+
         execvp(cmd1[0], cmd1); //Ends child
         printf("%s: command not found\n", cmd1[0]);
         exit(1);
     }
     //In this situation I did not fork in the child because I could not wait for pid2 to finish inside the parent
-    else
-    {
-        pid2 = fork();
+    
+    pid2 = fork();
 
-        if (pid2 == 0)
-        {
-            waitpid(pid1, NULL, 0); //Waiting for child to finish
-            logInfo("exec_pipe: Executing cmd2");
-        
-            execvp(cmd2[0], cmd2);
-            printf("%s: command not found\n", cmd2[0]);
-            exit(1);
-        }
+    if (pid2 == 0) //CHILD
+    {
+        waitpid(pid1, NULL, 0); //Waiting for child to finish
+        logInfo("exec_pipe: Executing cmd2");
+        close(pipefd[1]);
+        dup2(pipefd[0], 0);
+        close(pipefd[0]);
+
+        execvp(cmd2[0], cmd2);
+        printf("%s: command not found\n", cmd2[0]);
+        exit(1);
     }
+
     close(pipefd[0]);
     close(pipefd[1]);
     waitpid(pid2, NULL, 0);
@@ -440,6 +444,7 @@ void exec_pipe_in(char** cmd1, char** cmd2, char* infile)
     int pipefd[2];
     int pid2;
     int pid1;
+    int fd;
     logInfo("exec_pipe_in: Creating pipe");
     pipe(pipefd);
     logInfo("exec_pipe_in: Forking");
@@ -450,7 +455,7 @@ void exec_pipe_in(char** cmd1, char** cmd2, char* infile)
     else if (pid1 == 0)
     {
         logInfo("exec_pipe_in: Executing cmd1");
-        int fd = open(infile, O_RDONLY);
+        fd = open(infile, O_RDONLY);
         close(pipefd[0]);
         dup2(pipefd[1], 1);
 
@@ -463,23 +468,22 @@ void exec_pipe_in(char** cmd1, char** cmd2, char* infile)
         exit(1);
     }
     //In this situation I did not fork in the child because I could not wait for pid2 to finish inside the parent
-    else
+    
+    pid2 = fork();
+
+    if (pid2 == 0) //CHILD
     {
-        pid2 = fork();
+        waitpid(pid1, NULL, 0); //Waiting for child to finish
+        logInfo("exec_pipe_in: Executing cmd2");
+        close(pipefd[1]);
+        dup2(pipefd[0], 0);
+        close(pipefd[0]);
 
-        if (pid2 == 0) //CHILD
-        {
-            waitpid(pid1, NULL, 0); //Waiting for child to finish
-            logInfo("exec_pipe_in: Executing cmd2");
-            close(pipefd[1]);
-            dup2(pipefd[0], 0);
-            close(pipefd[0]);
-
-            execvp(cmd2[0], cmd2);
-            printf("%s: command not found\n", cmd2[0]);
-            exit(1);
-        }
+        execvp(cmd2[0], cmd2);
+        printf("%s: command not found\n", cmd2[0]);
+        exit(1);
     }
+
     close(pipefd[0]);
     close(pipefd[1]);
     waitpid(pid2, NULL, 0);
@@ -489,7 +493,8 @@ void exec_pipe_opt_in_append(char** cmd1,char** cmd2,char* infile,char* outfile)
     int pipefd[2];
     pid_t pid1;
     pid_t pid2;
-
+    int fd;
+    int outFD;
     pipe(pipefd);
     pid1 = fork();
 
@@ -500,7 +505,7 @@ void exec_pipe_opt_in_append(char** cmd1,char** cmd2,char* infile,char* outfile)
     else if (pid1 == 0)
     {
         logInfo("exec_pipe_opt_in_append: Executing cmd1");
-        int fd = open(infile, O_RDONLY);
+        fd = open(infile, O_RDONLY);
 
         close(pipefd[0]);
         dup2(pipefd[1], 1);
@@ -511,26 +516,25 @@ void exec_pipe_opt_in_append(char** cmd1,char** cmd2,char* infile,char* outfile)
         printf("%s: command not found\n", cmd1[0]);
         exit(1);
     }
-    if (pid1 > 0)
+    
+    pid2 = fork();
+    if (pid2 == 0)
     {
-        pid2 = fork();
-        if (pid2 == 0)
-        {
-            close(pipefd[1]);
-            dup2(pipefd[0], 0);
-            close(pipefd[0]);
-            
-            logInfo("exec_pipe_opt_in_append: Executing cmd2");
-            
-            int outFD = open(outfile, O_APPEND | O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-            dup2(outFD, 1);
-            close(outFD);
-            
-            execvp(cmd2[0], cmd2);
-            printf("%s: command not found\n", cmd2[0]);
-            exit(1);
-        }
+        close(pipefd[1]);
+        dup2(pipefd[0], 0);
+        close(pipefd[0]);
+        
+        logInfo("exec_pipe_opt_in_append: Executing cmd2");
+        
+        outFD = open(outfile, O_APPEND | O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+        dup2(outFD, 1);
+        close(outFD);
+        
+        execvp(cmd2[0], cmd2);
+        printf("%s: command not found\n", cmd2[0]);
+        exit(1);
     }
+
     close(pipefd[0]);
     close(pipefd[1]);
     waitpid(pid2, NULL, 0);
@@ -572,7 +576,7 @@ void exec_pipe_opt_in_write(char** cmd1,char** cmd2,char* infile,char* outfile)
             close(pipefd[0]);
             
             logInfo("exec_pipe_opt_in_write: Executing cmd2");
-            int outFD = open(outfile, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+            int outFD = open(outfile, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR);
             dup2(outFD, 1);
             close(outFD);
             
