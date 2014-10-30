@@ -28,16 +28,11 @@ void exec_pipe_opt_in_append(char** cmd1,char** cmd2,char* infile,char* outfile)
 void exec_pipe_opt_in_write(char** cmd1,char** cmd2,char* infile,char* outfile);
 
 bool interface(char *line);
-void unitTest();
+void logInfo(char *line);
 
 
 int main ( int argc, char *argv[] )
 {
-    bool debug = true;
-    if(debug == true)
-    {
-        unitTest();
-    }
     if (argc == 2)
     {
         interface(argv[1]);
@@ -54,7 +49,6 @@ int main ( int argc, char *argv[] )
             //Removing newline from commandls
             if ((strlen(userCommand) > 0) && (userCommand[strlen (userCommand) - 1] == '\n'))
             userCommand[strlen (userCommand) - 1] = '\0';
-            
             if (userCommand[0] != '\0' && userCommand != NULL)
             {
                 if ( interface(userCommand) == true)
@@ -100,7 +94,7 @@ bool interface(char *line)
             exec_cmd_opt_in_append(cmd1, infile, outfile);
             break;
         case 4:
-            printf("todo \n");
+            exec_cmd_opt_in_write(cmd1, infile, outfile);
             break;
         case 5:
             exec_pipe(cmd1, cmd2);
@@ -110,15 +104,15 @@ bool interface(char *line)
             break;
         case 7:
             exec_pipe_opt_in_append(cmd1, cmd2,infile,outfile);
-
             break;
         case 8:
+            exec_pipe_opt_in_write(cmd1, cmd2,infile,outfile);
             break;
         default:
-            printf("Not handled at this time");
             break;
     }
-    if (i < 9)
+    
+    if (i > 9)
     {
         k = 0;
         while (cmd1[k] != NULL)
@@ -145,122 +139,6 @@ bool interface(char *line)
     
     return continueExecute;
 }
-
-void unitTest()
-{
-    // Bad practices ftw
-    char infile[CSTRSIZE];
-    char outfile[CSTRSIZE];
-    char *cmd1[CMDSIZE];
-    char *cmd2[CMDSIZE];
-    int i;
-    int success =0;
-    
-    cmd1[0] = NULL;
-    cmd2[0] = NULL;
-    
-    char returnCode1Test1[50] = "ls";
-    char returnCode1Test2[50] = "ls –l";
-    char returnCode1Test3[50] = "ls –l –a";
-    
-    char returnCode2Test1[50] = "wc < filename";
-    
-    char returnCode3Test1[50] = "ls >> outputfile";
-    char returnCode3Test2[50] = "ls –l >> outputfile";
-    char returnCode3Test3[50] = "ls –l –a >> outputfile";
-    char returnCode3Test4[50] = "wc < filename >> outputfile";
-    
-    char returnCode4Test1[50] = "ls > outputfile";
-    char returnCode4Test2[50] = "ls –l > outputfile";
-    char returnCode4Test3[50] = "ls –l –a > outputfile";
-    char returnCode4Test4[50] = "wc < filename > outputfile";
-    
-    
-    char returnCode5Test1[50] = "ls | grep c";
-    char returnCode5Test2[50] = "ls –l | grep c";
-    char returnCode5Test3[50] = "ls –l –a | grep c";
-    
-    char returnCode6Test1[50] = "wc < filename | grep 3";
-    
-    char returnCode7Test1[50] = "ls | grep c >> outputfile";
-    char returnCode7Test2[50] = "ls –l | grep c >> outputfile";
-    char returnCode7Test3[50] = "ls –l –a | grep c >> outputfile";
-    char returnCode7Test4[50] = "wc < filename | grep 3 >> outputfile";
-    
-    char returnCode8Test1[50] = "ls | grep c > outputfile";
-    char returnCode8Test2[50] = "ls –l | grep c > outputfile";
-    char returnCode8Test3[50] = "ls –l –a | grep c > outputfile";
-    char returnCode8Test4[50] = "wc < filename | grep 3 > outputfile";
-    
-    char returnCode9Test1[50] = "cat file1 | grep c | wc";
-    char returnCode9Test2[50] = "netbeans&";
-    
-    
-    i = parse_command(returnCode1Test1, cmd1, cmd2, infile, outfile);
-    if(i==1) { success++; } else { printf("%s test failed. 1 != %d\n", returnCode1Test1 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode1Test2, cmd1, cmd2, infile, outfile);
-    if(i==1) { success++; } else { printf("%s test failed. 1 != %d\n", returnCode1Test2 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode1Test3, cmd1, cmd2, infile, outfile);
-    if(i==1) { success++; } else { printf("%s test failed. 1 != %d\n", returnCode1Test2 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    
-    i = parse_command(returnCode2Test1, cmd1, cmd2, infile, outfile);
-    if(i==2) { success++; } else { printf("%s test failed. 2 != %d\n", returnCode2Test1 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    
-    i = parse_command(returnCode3Test1, cmd1, cmd2, infile, outfile);
-    if(i==3) { success++; } else { printf("%s test failed. 3 != %d\n", returnCode3Test1 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode3Test2, cmd1, cmd2, infile, outfile);
-    if(i==3) { success++; } else { printf("%s test failed. 3 != %d\n", returnCode3Test2 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode3Test3, cmd1, cmd2, infile, outfile);
-    if(i==3) { success++; } else { printf("%s test failed. 3 != %d\n", returnCode3Test3 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode3Test4, cmd1, cmd2, infile, outfile);
-    if(i==3) { success++; } else { printf("%s test failed. 3 != %d\n", returnCode3Test4 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    
-    i = parse_command(returnCode4Test1, cmd1, cmd2, infile, outfile);
-    if(i==4) { success++; } else { printf("%s test failed. 1 != %d\n", returnCode4Test1 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode4Test2, cmd1, cmd2, infile, outfile);
-    if(i==4) { success++; } else { printf("%s test failed. 1 != %d\n", returnCode4Test2 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode4Test3, cmd1, cmd2, infile, outfile);
-    if(i==4) { success++; } else { printf("%s test failed. 1 != %d\n", returnCode4Test3 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode4Test4, cmd1, cmd2, infile, outfile);
-    if(i==4) { success++; } else { printf("%s test failed. 4 != %d\n", returnCode4Test4 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    
-    i = parse_command(returnCode5Test1, cmd1, cmd2, infile, outfile);
-    if(i==5) { success++; } else { printf("%s test failed. 5 != %d\n", returnCode5Test1 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode5Test2, cmd1, cmd2, infile, outfile);
-    if(i==5) { success++; } else { printf("%s test failed. 5 != %d\n", returnCode5Test2 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode5Test3, cmd1, cmd2, infile, outfile);
-    if(i==5) { success++; } else { printf("%s test failed. 5 != %d\n", returnCode5Test3 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    
-    i = parse_command(returnCode6Test1, cmd1, cmd2, infile, outfile);
-    if(i==6) { success++; } else { printf("%s test failed. 6 != %d\n", returnCode6Test1 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    
-    i = parse_command(returnCode7Test1, cmd1, cmd2, infile, outfile);
-    if(i==7) { success++; } else { printf("%s test failed. 7 != %d\n", returnCode7Test1 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode7Test2, cmd1, cmd2, infile, outfile);
-    if(i==7) { success++; } else { printf("%s test failed. 7 != %d\n", returnCode7Test2 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode7Test3, cmd1, cmd2, infile, outfile);
-    if(i==7) { success++; } else { printf("%s   test failed. 7 != %d\n", returnCode7Test3 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode7Test4, cmd1, cmd2, infile, outfile);
-    if(i==7) { success++; } else { printf("%s test failed. 7 != %d\n", returnCode7Test4 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    
-    
-    i = parse_command(returnCode8Test1, cmd1, cmd2, infile, outfile);
-    if(i==8) { success++; } else { printf("%s test failed. 8 != %d\n", returnCode8Test1 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode8Test2, cmd1, cmd2, infile, outfile);
-    if(i==8) { success++; } else { printf("%s test failed. 8 != %d\n", returnCode8Test2 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode8Test3, cmd1, cmd2, infile, outfile);
-    if(i==8) { success++; } else { printf("%s test failed. 8 != %d\n", returnCode8Test3 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode8Test4, cmd1, cmd2, infile, outfile);
-    if(i==8) { success++; } else { printf("%s test failed. 8 != %d\n", returnCode8Test4 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    
-    i = parse_command(returnCode9Test1, cmd1, cmd2, infile, outfile);
-    if(i==9) { success++; } else { printf("%s test failed. 9 != %d\n", returnCode9Test1 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    i = parse_command(returnCode9Test2, cmd1, cmd2, infile, outfile);
-    if(i==9) { success++; } else { printf("%s test failed. 9 != %d\n", returnCode9Test2 ,i); } i=0;cmd1[0] = NULL; cmd2[0] = NULL;
-    
-    printf("%d/26 provided tests completed successfully\n", success);
-}
-
 int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outfile)
 {
     int returnCode = 9;
@@ -467,7 +345,34 @@ void exec_cmd_opt_in_append(char** cmd1, char* infile, char* outfile)
 }
 void exec_cmd_opt_in_write(char** cmd1, char* infile, char* outfile)
 {
+    pid_t pid;
     
+    if ((pid = fork()) == -1)
+    {
+        perror("fork error");
+    }
+    else if (pid == 0)
+    {
+        if(outfile[0] != '\0')
+        {
+            int outFD = open(outfile, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+            if(infile[0] != '\0')
+            {
+                int inFD = open(infile, O_RDONLY);
+                dup2(inFD, 0);
+                close(inFD);
+            }
+            dup2(outFD, 1);
+            close(outFD);
+            
+            execvp(cmd1[0], cmd1);
+        }
+    }
+    else
+    {
+        waitpid(pid, NULL, 0);
+        
+    }
 }
 void exec_pipe(char** cmd1, char** cmd2)
 {
@@ -609,5 +514,59 @@ void exec_pipe_opt_in_append(char** cmd1,char** cmd2,char* infile,char* outfile)
 }
 void exec_pipe_opt_in_write(char** cmd1,char** cmd2,char* infile,char* outfile)
 {
-    
+    int pipefd[2];
+    pid_t pid1;
+    pid_t pid2;
+
+    pipe(pipefd);
+    pid1 = fork();
+
+    if (pid1 < 0)
+    {
+        perror("error with fork");
+    }
+    else if (pid1 == 0)
+    {
+        int fd = open(infile, O_RDONLY);
+
+        close(pipefd[0]);
+        dup2(pipefd[1], 1);
+        dup2(fd, 0);
+        close(fd);
+        close(pipefd[1]);
+        execvp(cmd1[0], cmd1);
+        printf("%s: command not found\n", cmd1[0]);
+        exit(1);
+    }
+    if (pid1 > 0)
+    {
+        pid2 = fork();
+        if (pid2 == 0)
+        {
+            close(pipefd[1]);
+            dup2(pipefd[0], 0);
+            close(pipefd[0]);
+            
+            int outFD = open(outfile, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+            dup2(outFD, 1);
+            close(outFD);  
+            
+            execvp(cmd2[0], cmd2);
+            printf("%s: command not found\n", cmd2[0]);
+            exit(1);
+        }
+    }
+    close(pipefd[0]);
+    close(pipefd[1]);
+    waitpid(pid2, NULL, 0);
+}
+void logInfo(char *line)
+{
+    int fd1;
+    fd1 = dup(1);
+    int fd = open("log.txt", O_APPEND | O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);    
+    dup2(fd, 1);
+    close(fd);
+    printf("PID: %d : %s\n", getpid(),line);
+    dup2(fd1, 1);
 }
