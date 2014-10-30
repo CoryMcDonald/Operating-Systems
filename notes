@@ -1,0 +1,20 @@
+Exam questions for Operating System
+Crticial Exclusion
+
+
+Quiz
+  Mutual Exclusion
+    Peterson's solution, guarantee progress.
+    Hardware solution (test_and_set instruction)
+  Semaphore
+    If then else file, synchronizes processes. A mutex is made of these
+    Wait () and signal()
+  Classic Problems of Sync
+    Bounded-Buffer Problem
+      Solution:
+        Pipe is the solution
+        Suppose you have several printers, grab one printer and then they return it back
+        Three sempahores, wait(), sync()
+    Reader/Writer
+      
+    Dining-Philospopher
