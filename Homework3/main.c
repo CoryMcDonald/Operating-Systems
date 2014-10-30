@@ -281,22 +281,28 @@ int parse_command(char *line, char **cmd1, char **cmd2, char *infile, char *outf
 void exec_cmd(char** cmd1)
 {
     pid_t pid;
+    logInfo("Forking simple command");
     if ((pid = fork()) == -1)
     {
         perror("fork error");
     }
     else if (pid == 0)
     {
+        logInfo("Executing simple command");
         execvp(cmd1[0], cmd1);
         printf("%s: command not found\n", cmd1[0]);
+        logInfo("simple command failed");
     }else
     {
         waitpid(pid, NULL, 0);
     }
+    logInfo("Done with simple command");
+
 }
 void exec_cmd_in(char** cmd1, char* infile)
 {
     pid_t pid;
+    
     if ((pid = fork()) == -1)
     {
         perror("fork error");
